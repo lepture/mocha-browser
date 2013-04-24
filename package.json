@@ -1,0 +1,14 @@
+{
+  "name": "mocha-browser",
+  "version": "0.1.0",
+  "description": "A mocha test suite for browser",
+  "author": "Hsiaoming Yang <me@lepture.com>",
+  "dependencies": {
+    "mocha": "*",
+    "commander": "*",
+    "node-static": "*"
+  },
+  "bin": {
+    "mocha-browser": "bin/mocha-browser"
+  }
+}

@@ -1,0 +1,181 @@
+#!/usr/bin/env node
+
+var program = require('commander'),
+      print = require('util').print,
+         fs = require('fs'),
+       path = require('path'),
+     exists = fs.existsSync || path.existsSync,
+        cwd = process.cwd(),
+    cookies = [],
+    headers = {},
+   settings = {};
+
+function keyValue(val, store) {
+  val = val.split('=');
+  if (val[1] === 'true') {
+    val[1] = true;
+  } else if (val[1] === 'false') {
+    val[1] = false;
+  }
+  store[val[0]] = val[1];
+  return val;
+}
+function cookiesParser(val) {
+  val = JSON.parse(val);
+  cookies.push(val);
+  return val;
+}
+function header(val) {
+  return keyValue(val, headers);
+}
+function setting(val) {
+  return keyValue(val, settings);
+}
+function viewport(val) {
+  val = val.split('x');
+  return {
+    width: parseFloat(val[0]),
+    height: parseFloat(val[1])
+  };
+}
+
+program
+  .version(require('../package').version)
+  .usage('[options] page')
+  .option('-R, --reporter <name>',       'specify the reporter to use', 'spec')
+  .option('-t, --timeout <timeout>',     'specify the test startup timeout to use', parseInt, 6000)
+  .option('-A, --agent <userAgent>',     'specify the user agent to use')
+  .option('-c, --cookies <Object>',      'phantomjs cookie object http://git.io/RmPxgA', cookiesParser)
+  .option('-H, --header <name>=<value>', 'specify custom header', header)
+  .option('-s, --setting <key>=<value>', 'specify specific phantom settings', setting)
+  .option('-v, --view <width>x<height>', 'specify phantom viewport size', viewport)
+  .option('-S, --server',                'start a http server for phantom')
+  .option('-P, --port <port>',           'specify http port for the server', parseInt, 9122)
+  .option('-C, --no-color',              'disable color escape codes');
+
+program.on('--help', function(){
+  console.log('  Examples:');
+  console.log('');
+  console.log('    $ mocha-browser -R dot test/file.html');
+  console.log('    $ mocha-browser -S test/file.html');
+  console.log('');
+});
+
+program.parse(process.argv);
+
+if (!program.args.length) {
+  program.outputHelp();
+  process.exit(1);
+}
+if (program.agent) {
+  settings.userAgent = program.agent;
+}
+
+var script = fs.realpathSync(__dirname + '/../lib/mocha-phantomjs.coffee');
+var reporter = program.reporter;
+var page = function() {
+  var arg = program.args[0];
+
+  if (arg.match(/file:\/\//)) {
+    return arg;
+  }
+  if (arg.match(/http:\/\//)) {
+    return arg;
+  }
+  if (arg.match(/https:\/\//)) {
+    return arg;
+  }
+  if (exists(arg)) {
+    if (program.server) {
+      return 'http://127.0.0.1:' + program.port + '/' + arg;
+    }
+    return arg;
+  }
+  if (exists(cwd + '/' + arg)) {
+    return fs.realpathSync(cwd+'/'+arg);
+  }
+  return arg;
+}();
+
+var config = JSON.stringify({
+  timeout: program.timeout,
+  cookies: cookies,
+  headers: headers,
+  settings: settings,
+  viewportSize: program.view,
+  useColors: program.color
+});
+
+var self = require('..');
+var coverter = self[reporter];
+if (coverter) {
+  reporter = coverter.reporter;
+}
+
+var spawnArgs = [script, page, reporter, config];
+
+var phantomjs;
+for (var i=0; i < module.paths.length; i++) {
+  var bin = path.join(module.paths[i], '.bin/phantomjs');
+  if (process.platform === 'win32') {
+    bin += '.cmd';
+  }
+  if (exists(bin)) {
+    phantomjs = bin;
+    break;
+  }
+}
+if (phantomjs === undefined) {
+  phantomjs = 'phantomjs'
+}
+
+function main(subprocess, server) {
+  if (coverter) {
+    coverter.listen();
+  }
+  subprocess.stdout.on('data', function(data){
+    if (coverter) {
+      self.emit('data', data.toString());
+    } else {
+      print(data.toString());
+    }
+  });
+  subprocess.stdout.on('end', function() {
+    if (self) {
+      self.emit('end');
+    }
+  });
+
+  subprocess.on('exit', function(code){
+    if (code === 127) { 
+      print("Perhaps phantomjs is not installed?\n");
+    }
+    if (server) {
+      server.close();
+    }
+    process.exit(code);
+  });
+}
+
+function createServer() {
+  var spawn = require('child_process').spawn;
+
+  if (!program.server) {
+    return main(spawn(phantomjs, spawnArgs));
+  }
+
+  var Server = require('node-static').Server;
+  var http = require('http');
+
+  var file = new Server(fs.realpathSync('.'));
+
+  var server = http.createServer(function(request, response) {
+    request.addListener('end', function() {
+      file.serve(request, response);
+    }).resume();
+  });
+  server.listen(program.port, function() {
+    return main(spawn(phantomjs, spawnArgs), server);
+  });
+}
+createServer();
