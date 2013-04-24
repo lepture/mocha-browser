@@ -4,6 +4,11 @@ var EventEmitter = require('events').EventEmitter;
 
 var event = new EventEmitter();
 
+/*
+ * lcov reporter for coveralls.io
+ *
+ * $ mocha-browser -R lcov page | coveralls
+ */
 function lcov() {
   var data = '';
   event.on('data', function(chunk) {
@@ -24,12 +29,17 @@ function lcov() {
   });
 }
 
+/*
+ * html-cov reporter that really works
+ *
+ * $ mocha-browser -R html-cov page
+ */
 function htmlCov() {
+  // get everything we need from mocha
   var jade = require('mocha/node_modules/jade');
   var reporter = require.resolve('mocha/lib/reporters/html-cov');
   var file = path.join(path.dirname(reporter), 'templates/coverage.jade');
   var fn = jade.compile(fs.readFileSync(file, 'utf-8'), {filename: file});
-
   var data = '';
 
   event.on('data', function(chunk) {
@@ -48,7 +58,6 @@ function htmlCov() {
       }
     }));
   });
-
 }
 
 exports = module.exports = event;
