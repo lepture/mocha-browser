@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**May 2, 2013** `0.1.1`
+
+Process exit on nextTick.
+
 **April 24, 2013** `0.1.0`
 
 First preview release.
