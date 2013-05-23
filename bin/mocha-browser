@@ -150,10 +150,10 @@ function main(subprocess, server) {
     if (code === 127) { 
       print("Perhaps phantomjs is not installed?\n");
     }
-    if (server) {
-      server.close();
-    }
     process.nextTick(function() {
+      if (server) {
+        server.close();
+      }
       process.exit(code);
     });
   });
