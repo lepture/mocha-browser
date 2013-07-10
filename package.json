@@ -1,6 +1,6 @@
 {
   "name": "mocha-browser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A mocha test suite for browser",
   "author": "Hsiaoming Yang <me@lepture.com>",
   "homepage": "https://github.com/lepture/mocha-browser",

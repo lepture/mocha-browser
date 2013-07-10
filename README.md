@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**July 10, 2013** `0.1.2`
+
+Add option output for coverage.
+
 **May 2, 2013** `0.1.1`
 
 Process exit on nextTick.
