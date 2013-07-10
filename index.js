@@ -4,6 +4,8 @@ var EventEmitter = require('events').EventEmitter;
 
 var event = new EventEmitter();
 
+exports.outputJSON = null;
+
 /*
  * lcov reporter for coveralls.io
  *
@@ -15,7 +17,8 @@ function lcov() {
     data += chunk;
   });
   event.on('end', function() {
-    var files = JSON.parse(data.replace(/^[^{]*({)/g, '$1')).files;
+    data = cleanJSON(data);
+    var files = data.files;
     for (var i in files) {
       var file = files[i];
       process.stdout.write('SF:' + file.filename + '\n');
@@ -47,7 +50,7 @@ function htmlCov() {
   });
 
   event.on('end', function() {
-    data = JSON.parse(data.replace(/^[^{]*({)/g, '$1'));
+    data = cleanJSON(data);
     process.stdout.write(fn({
       cov: data,
       coverageClass: function(n) {
@@ -58,6 +61,14 @@ function htmlCov() {
       }
     }));
   });
+}
+
+function cleanJSON(data) {
+  data = data.replace(/^[^{]*({)/g, '$1');
+  if (exports.outputJSON) {
+    fs.writeFileSync(exports.outputJSON, data)
+  }
+  return JSON.parse(data);
 }
 
 exports = module.exports = event;

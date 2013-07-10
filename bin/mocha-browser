@@ -50,6 +50,7 @@ program
   .option('-s, --setting <key>=<value>', 'specify specific phantom settings', setting)
   .option('-v, --view <width>x<height>', 'specify phantom viewport size', viewport)
   .option('-S, --server',                'start a http server for phantom')
+  .option('-o, --output <file>',         'output json coverage to a file')
   .option('-P, --port <port>',           'specify http port for the server', parseInt, 9122)
   .option('-C, --no-color',              'disable color escape codes');
 
@@ -107,6 +108,7 @@ var config = JSON.stringify({
 });
 
 var self = require('..');
+self.outputJSON = program.output;
 var coverter = self[reporter];
 if (coverter) {
   reporter = coverter.reporter;
