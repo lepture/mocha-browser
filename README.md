@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**Aug 15, 2015** `0.1.3`
+
+Support for windows.
+
 **July 10, 2013** `0.1.2`
 
 Add option output for coverage.
