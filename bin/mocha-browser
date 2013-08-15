@@ -162,7 +162,7 @@ function main(subprocess, server) {
 }
 
 function createServer() {
-  var spawn = require('child_process').spawn;
+  var spawn = require('win-spawn');
 
   if (!program.server) {
     return main(spawn(phantomjs, spawnArgs));
