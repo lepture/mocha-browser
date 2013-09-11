@@ -56,7 +56,11 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
-**Aug 15, 2015** `0.1.3`
+**Sep 11, 2013** `0.1.4`
+
+Fix for Mocha.process.
+
+**Aug 15, 2013** `0.1.3`
 
 Support for windows.
 
