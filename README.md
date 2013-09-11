@@ -56,7 +56,7 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
-**Sep 11, 2013** `0.1.4`
+**Sep 11, 2013** `0.1.4` `0.1.5`
 
 Fix for Mocha.process.
 
