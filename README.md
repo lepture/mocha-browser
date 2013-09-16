@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**Oct 16, 2013** `0.1.6`
+
+Fixed `file?dist` not existed problem.
+
 **Sep 11, 2013** `0.1.4` `0.1.5`
 
 Fix for Mocha.process.
