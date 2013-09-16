@@ -89,7 +89,7 @@ var page = function() {
 
   // handle _site/tests/runner.html?dist
   // it would be not existed
-  filePath = arg.replace(/\?.*$/, '');
+  var filePath = arg.replace(/\?.*$/, '');
 
   if (exists(filePath)) {
     if (program.server) {
