@@ -19,16 +19,8 @@ class Reporter
     @initPage()
     @loadPage()
 
-  # Subclass Hooks
-
-  customizeRunner: (options) ->
-    undefined
-
-  customizeProcessStdout: (options) ->
-    undefined
-
-  customizeConsole: (options) ->
-    undefined
+  customizeMocha: (options) ->
+    Mocha.reporters.Base.window.width = options.columns
 
   customizeOptions: ->
     columns: @columns
@@ -46,18 +38,27 @@ class Reporter
     @page = webpage.create
       settings: @config.settings
     @page.customHeaders = @config.headers if @config.headers
-    @page.addCookie(cookie) for cookie in @config.cookies
+    @page.addCookie(cookie) for cookie in @config.cookies or []
     @page.viewportSize = @config.viewportSize if @config.viewportSize
-    @page.onConsoleMessage = (msg) -> console.log msg
+    @page.onConsoleMessage = (msg) -> system.stdout.writeLine(msg)
+    @page.onResourceError = (resErr) ->
+      system.stdout.writeLine "Error loading resource #{resErr.url} (#{resErr.errorCode}). Details: #{resErr.errorString}"
+    @page.onError = (msg, traces) =>
+      return if @page.evaluate -> window.onerror?
+      for {line, file}, index in traces
+        traces[index] = "  #{file}:#{line}"
+      @fail "#{msg}\n\n#{traces.join '\n'}"
     @page.onInitialized = =>
-      @page.evaluate ->
+      @page.evaluate (env)->
         window.mochaPhantomJS =
+          env: env
           failures: 0
           ended: false
           started: false
           run: ->
             mochaPhantomJS.started = true
-            window.callPhantom 'mochaPhantomJS.run'
+            window.callPhantom 'mochaPhantomJS.run': true
+      , system.env
 
   loadPage: ->
     @page.open @url
@@ -66,17 +67,19 @@ class Reporter
       @onLoadFailed() if status isnt 'success'
       @waitForInitMocha()
     @page.onCallback = (data) =>
-      if data is 'mochaPhantomJS.run'
+      if data.hasOwnProperty 'Mocha.process.stdout.write'
+        system.stdout.write data['Mocha.process.stdout.write']
+      else if data.hasOwnProperty 'mochaPhantomJS.run'
         @waitForRunMocha() if @injectJS()
+      true
 
   onLoadFailed: ->
     @fail "Failed to load the page. Check the url: #{@url}"
 
   injectJS: ->
     if @page.evaluate(-> window.mocha?)
-      @page.injectJs 'es5-shim.js'
-      @page.evaluate @customizeProcessStdout, @customizeOptions()
-      @page.evaluate @customizeConsole, @customizeOptions()
+      @page.injectJs 'mocha-phantomjs/core_extensions.js'
+      @page.evaluate @customizeMocha, @customizeOptions()
       true
     else
       @fail "Failed to find mocha on the page."
@@ -88,7 +91,6 @@ class Reporter
     @mochaStarted = @page.evaluate -> mochaPhantomJS.runner or false
     if @mochaStarted
       @mochaRunAt = new Date().getTime()
-      @page.evaluate @customizeRunner, @customizeOptions()
       @waitForMocha()
     else
       @fail "Failed to start mocha."
@@ -124,135 +126,13 @@ class Reporter
     catch error
       false
 
-class Spec extends Reporter
+if phantom.version.major isnt 1 or phantom.version.minor < 9
+  console.log 'mocha-phantomjs requires PhantomJS > 1.9.1'
+  phantom.exit -1
 
-  constructor: (config) ->
-    super 'spec', config
+reporter = system.args[2] || 'spec'
+config   = JSON.parse system.args[3] || '{}'
 
-  customizeProcessStdout: (options) ->
-    process.stdout.write = (string) ->
-      return if string is process.cursor.deleteLine or string is process.cursor.beginningOfLine
-      console.log string
+mocha = new Reporter reporter, config
+mocha.run()
 
-  customizeConsole: (options) ->
-    process.cursor.CRMatcher = /\s+◦\s\S/
-    process.cursor.CRCleaner = process.cursor.up + process.cursor.deleteLine
-    origLog = console.log
-    console.log = ->
-      string = console.format.apply(console, arguments)
-      if string.match(process.cursor.CRMatcher)
-        process.cursor.CRCleanup = true
-      else if process.cursor.CRCleanup
-        string = process.cursor.CRCleaner + string
-        process.cursor.CRCleanup = false
-      origLog.call console, string
-
-class Dot extends Reporter
-
-  constructor: (config) ->
-    super 'dot', config
-
-  customizeProcessStdout: (options) ->
-    process.cursor.margin = 2
-    process.cursor.CRMatcher = /\u001b\[\d\dm\․\u001b\[0m/
-    process.stdout.columns = options.columns
-    process.stdout.allowedFirstNewLine = false
-    process.stdout.write = (string) ->
-      if string is '\n  '
-        unless process.stdout.allowedFirstNewLine
-          process.stdout.allowedFirstNewLine = true
-        else
-          return
-      else if string.match(process.cursor.CRMatcher)
-        if process.cursor.count is process.stdout.columns
-          process.cursor.count = 0
-          forward = process.cursor.margin
-          string = process.cursor.forwardN(forward) + string
-        else
-          forward = process.cursor.margin + process.cursor.count
-          string = process.cursor.up + process.cursor.forwardN(forward) + string
-        ++process.cursor.count
-      console.log string
-
-class Tap extends Reporter
-
-  constructor: (config) ->
-    super 'tap', config
-
-class List extends Reporter
-
-  constructor: (config) ->
-    super 'list', config
-
-  customizeProcessStdout: (options) ->
-    process.stdout.write = (string) ->
-      return if string is process.cursor.deleteLine or string is process.cursor.beginningOfLine
-      console.log string
-
-  customizeProcessStdout: (options) ->
-    process.cursor.CRMatcher = /\u001b\[90m.*:\s\u001b\[0m/
-    process.cursor.CRCleaner = (string) -> process.cursor.up + process.cursor.deleteLine + string + process.cursor.up + process.cursor.up
-    origLog = console.log
-    console.log = ->
-      string = console.format.apply(console, arguments)
-      if string.match /\u001b\[32m\s\s-\u001b\[0m/
-        string = string
-        process.cursor.CRCleanup = false
-      if string.match(process.cursor.CRMatcher)
-        process.cursor.CRCleanup = true
-      else if process.cursor.CRCleanup
-        string = process.cursor.CRCleaner(string)
-        process.cursor.CRCleanup = false
-      origLog.call console, string
-
-class Min extends Reporter
-
-  constructor: (config) ->
-    super 'min', config
-
-class Doc extends Reporter
-
-  constructor: (config) ->
-    super 'doc', config
-
-class Teamcity extends Reporter
-
-  constructor: (config) ->
-    super 'teamcity', config
-
-class Xunit extends Reporter
-
-  constructor: (config) ->
-    super 'xunit', config
-
-class Json extends Reporter
-
-  constructor: (config) ->
-    super 'json', config
-
-class JsonCov extends Reporter
-
-  constructor: (config) ->
-    super 'json-cov', config
-
-class HtmlCov extends Reporter
-
-  constructor: (config) ->
-    super 'html-cov', config
-
-
-reporterString = system.args[2] || 'spec'
-reporterString = ("#{s.charAt(0).toUpperCase()}#{s.slice(1)}" for s in reporterString.split('-')).join('')
-reporterKlass  = try
-                   eval(reporterString)
-                 catch error
-                   undefined
-
-config = JSON.parse(system.args[3] || '{}')
-
-if reporterKlass
-  reporter = new reporterKlass config
-  reporter.run()
-else
-  console.log "Reporter class not implemented: #{reporterString}"
-  phantom.exit 1
