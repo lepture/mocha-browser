@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**Dec 2, 2013** `0.2.0`
+
+Update mocha-phantomjs
+
 **Oct 16, 2013** `0.1.6`
 
 Fixed `file?dist` not existed problem.
