@@ -1,10 +1,148 @@
 var fs = require('fs');
 var path = require('path');
 var EventEmitter = require('events').EventEmitter;
+var print = require('util').print;
+var fs = require('fs');
+var path = require('path');
+var exists = fs.existsSync || path.existsSync;
+var cwd = process.cwd();
 
 var event = new EventEmitter();
+event['lcov'] = {
+  reporter: 'json-cov',
+  listen: lcov
+};
 
-exports.outputJSON = null;
+event['html-cov'] = {
+  reporter: 'json-cov',
+  listen: htmlCov
+};
+
+module.exports = function(program) {
+
+  if (program.agent) {
+    settings.userAgent = program.agent;
+  }
+
+  var script = fs.realpathSync(__dirname + '/lib/mocha-phantomjs.coffee');
+  var reporter = program.reporter;
+  var page = function() {
+    var arg = program.args[0];
+
+    if (arg.match(/file:\/\//)) {
+      return arg;
+    }
+    if (arg.match(/http:\/\//)) {
+      return arg;
+    }
+    if (arg.match(/https:\/\//)) {
+      return arg;
+    }
+
+    // handle _site/tests/runner.html?dist
+    // it would be not existed
+    var filePath = arg.replace(/\?.*$/, '');
+
+    if (exists(filePath)) {
+      if (program.server) {
+        return 'http://127.0.0.1:' + program.port + '/' + arg;
+      }
+      return arg;
+    }
+    if (exists(cwd + '/' + filePath)) {
+      return fs.realpathSync(cwd+'/'+arg);
+    }
+    return arg;
+  }();
+
+  var config = JSON.stringify({
+    timeout: program.timeout,
+    cookies: program.cookies,
+    headers: program.headers,
+    settings: program.settings,
+    viewportSize: program.view,
+    useColors: program.color
+  });
+
+  event.outputJSON = program.output;
+  var coverter = event[reporter];
+  if (coverter) {
+    reporter = coverter.reporter;
+  }
+
+  var spawnArgs = [script, page, reporter, config];
+
+  var phantomjs;
+  for (var i=0; i < module.paths.length; i++) {
+    var bin = path.join(module.paths[i], '.bin/phantomjs');
+    if (process.platform === 'win32') {
+      bin += '.cmd';
+    }
+    if (exists(bin)) {
+      phantomjs = bin;
+      break;
+    }
+  }
+  if (phantomjs === undefined) {
+    phantomjs = 'phantomjs'
+  }
+
+  function main(subprocess, server) {
+    if (coverter) {
+      coverter.listen();
+    }
+    subprocess.stdout.on('data', function(data){
+      if (coverter) {
+        event.emit('data', data.toString());
+      } else {
+        print(data.toString());
+      }
+    });
+    subprocess.stdout.on('end', function() {
+      if (event) {
+        event.emit('end');
+      }
+    });
+
+    subprocess.on('exit', function(code){
+      if (code === 127) {
+        print("Perhaps phantomjs is not installed?\n");
+      }
+      process.nextTick(function() {
+        if (server) {
+          server.close();
+        }
+        process.exit(code);
+      });
+    });
+  }
+
+  function createServer() {
+    var spawn = require('win-spawn');
+
+    if (!program.server) {
+      return main(spawn(phantomjs, spawnArgs));
+    }
+
+    var Server = require('node-static').Server;
+    var http = require('http');
+
+    var file = new Server(fs.realpathSync('.'));
+
+    var server = http.createServer(function(request, response) {
+      request.addListener('end', function() {
+        file.serve(request, response);
+      }).resume();
+    });
+    server.listen(program.port, function() {
+      return main(spawn(phantomjs, spawnArgs), server);
+    });
+  }
+
+  createServer();
+
+};
+
 
 /*
  * lcov reporter for coveralls.io
@@ -70,15 +208,3 @@ function cleanJSON(data) {
   }
   return JSON.parse(data);
 }
-
-exports = module.exports = event;
-
-exports['lcov'] = {
-  reporter: 'json-cov',
-  listen: lcov
-};
-
-exports['html-cov'] = {
-  reporter: 'json-cov',
-  listen: htmlCov
-};
