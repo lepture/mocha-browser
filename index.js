@@ -18,7 +18,7 @@ event['html-cov'] = {
   listen: htmlCov
 };
 
-module.exports = function(program) {
+module.exports = function(program, callback) {
 
   if (program.agent) {
     settings.userAgent = program.agent;
@@ -87,10 +87,11 @@ module.exports = function(program) {
     phantomjs = 'phantomjs'
   }
 
-  function main(subprocess, server) {
+  function main(subprocess, server, callback) {
     if (coverter) {
       coverter.listen();
     }
+
     subprocess.stdout.on('data', function(data){
       if (coverter) {
         event.emit('data', data.toString());
@@ -98,9 +99,11 @@ module.exports = function(program) {
         print(data.toString());
       }
     });
+
     subprocess.stdout.on('end', function() {
       if (event) {
         event.emit('end');
+        callback && callback();
       }
     });
 
@@ -112,6 +115,7 @@ module.exports = function(program) {
         if (server) {
           server.close();
         }
+        callback && callback();
         process.exit(code);
       });
     });
@@ -121,7 +125,7 @@ module.exports = function(program) {
     var spawn = require('win-spawn');
 
     if (!program.server) {
-      return main(spawn(phantomjs, spawnArgs));
+      return main(spawn(phantomjs, spawnArgs), callback);
     }
 
     var Server = require('node-static').Server;
@@ -135,7 +139,7 @@ module.exports = function(program) {
       }).resume();
     });
     server.listen(program.port, function() {
-      return main(spawn(phantomjs, spawnArgs), server);
+      return main(spawn(phantomjs, spawnArgs), server, callback);
     });
   }
 
