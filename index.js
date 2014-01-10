@@ -97,7 +97,7 @@ module.exports = function(program, callback) {
     var spawn = require('win-spawn');
 
     if (!program.server) {
-      return main(spawn(phantomjs, spawnArgs), callback);
+      return main(spawn(phantomjs, spawnArgs), null, callback);
     }
 
     var Server = require('node-static').Server;
