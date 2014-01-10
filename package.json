@@ -13,7 +13,6 @@
   "dependencies": {
     "win-spawn": "~2.0.0",
     "mocha": "*",
-    "phantomjs": "*",
     "commander": "*",
     "node-static": "*"
   },

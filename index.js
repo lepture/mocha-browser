@@ -75,7 +75,6 @@ module.exports = function(program, callback) {
     subprocess.stdout.on('end', function() {
       if (event) {
         event.emit('end');
-        callback && callback();
       }
     });
 
@@ -179,8 +178,8 @@ function htmlCov() {
 
 function cleanJSON(data) {
   data = data.replace(/^[^{]*({)/g, '$1');
-  if (exports.outputJSON) {
-    fs.writeFileSync(exports.outputJSON, data)
+  if (event.outputJSON) {
+    fs.writeFileSync(event.outputJSON, data)
   }
   return JSON.parse(data);
 }
