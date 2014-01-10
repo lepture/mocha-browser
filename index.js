@@ -26,34 +26,6 @@ module.exports = function(program, callback) {
 
   var script = fs.realpathSync(__dirname + '/lib/mocha-phantomjs.coffee');
   var reporter = program.reporter;
-  var page = function() {
-    var arg = program.args[0];
-
-    if (arg.match(/file:\/\//)) {
-      return arg;
-    }
-    if (arg.match(/http:\/\//)) {
-      return arg;
-    }
-    if (arg.match(/https:\/\//)) {
-      return arg;
-    }
-
-    // handle _site/tests/runner.html?dist
-    // it would be not existed
-    var filePath = arg.replace(/\?.*$/, '');
-
-    if (exists(filePath)) {
-      if (program.server) {
-        return 'http://127.0.0.1:' + program.port + '/' + arg;
-      }
-      return arg;
-    }
-    if (exists(cwd + '/' + filePath)) {
-      return fs.realpathSync(cwd+'/'+arg);
-    }
-    return arg;
-  }();
 
   var config = JSON.stringify({
     timeout: program.timeout,
@@ -70,7 +42,7 @@ module.exports = function(program, callback) {
     reporter = coverter.reporter;
   }
 
-  var spawnArgs = [script, page, reporter, config];
+  var spawnArgs = [script, program.page, reporter, config];
 
   var phantomjs;
   for (var i=0; i < module.paths.length; i++) {
