@@ -86,8 +86,11 @@ module.exports = function(program, callback) {
         if (server) {
           server.close();
         }
-        callback && callback();
-        process.exit(code);
+        if (callback) {
+          callback();
+        } else {
+          process.exit(code);
+        }
       });
     });
   }
