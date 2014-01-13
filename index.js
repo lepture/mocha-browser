@@ -6,19 +6,19 @@ var fs = require('fs');
 var path = require('path');
 var exists = fs.existsSync || path.existsSync;
 var cwd = process.cwd();
-
-var event = new EventEmitter();
-event['lcov'] = {
-  reporter: 'json-cov',
-  listen: lcov
-};
-
-event['html-cov'] = {
-  reporter: 'json-cov',
-  listen: htmlCov
-};
+var event;
 
 module.exports = function(program, callback) {
+  event = new EventEmitter();
+  event['lcov'] = {
+    reporter: 'json-cov',
+    listen: lcov
+  };
+
+  event['html-cov'] = {
+    reporter: 'json-cov',
+    listen: htmlCov
+  };
 
   if (program.agent) {
     settings.userAgent = program.agent;
@@ -59,7 +59,7 @@ module.exports = function(program, callback) {
     phantomjs = 'phantomjs'
   }
 
-  function main(subprocess, server, callback) {
+  function main(subprocess, server, complete) {
     if (coverter) {
       coverter.listen();
     }
@@ -86,11 +86,7 @@ module.exports = function(program, callback) {
         if (server) {
           server.close();
         }
-        if (callback) {
-          callback();
-        } else {
-          process.exit(code);
-        }
+        complete && complete(code);
       });
     });
   }

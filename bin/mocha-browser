@@ -4,6 +4,7 @@ var program = require('commander');
 var fs = require('fs');
 var path = require('path');
 var exists = fs.existsSync || path.existsSync;
+var cwd = process.cwd();
 var cookies = [];
 var headers = {};
 var settings = {};
@@ -101,4 +102,6 @@ program.page = function() {
 }();
 
 var mochaBrowser = require('..');
-mochaBrowser(program);
+mochaBrowser(program, function(code) {
+  process.exit(code);
+});
