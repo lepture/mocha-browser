@@ -1,9 +1,9 @@
 {
   "name": "mocha-browser-for-spm",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A mocha test suite for browser",
   "author": "Hsiaoming Yang <me@lepture.com>",
-  "homepage": "https://github.com/lepture/mocha-browser",
+  "homepage": "https://github.com/afc163/mocha-browser",
   "keywords": [
     "test",
     "mocha",
@@ -19,10 +19,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lepture/mocha-browser.git"
+    "url": "https://github.com/afc163/mocha-browser.git"
   },
   "bugs": {
-    "url": "https://github.com/lepture/mocha-browser/issues"
+    "url": "https://github.com/afc163/mocha-browser/issues"
   },
   "bin": {
     "mocha-browser": "bin/mocha-browser"
