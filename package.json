@@ -1,6 +1,6 @@
 {
   "name": "mocha-browser-for-spm",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A mocha test suite for browser",
   "author": "Hsiaoming Yang <me@lepture.com>",
   "homepage": "https://github.com/afc163/mocha-browser",
@@ -28,6 +28,6 @@
     "mocha-browser": "bin/mocha-browser"
   },
   "scripts": {
-    "preinstall": "PHANTOMJS_CDNURL=http://phantomjs.qiniudn.com npm install phantomjs"
+    "preinstall": "node preinstall.js"
   }
 }
