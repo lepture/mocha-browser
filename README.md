@@ -14,7 +14,7 @@ $ npm install mocha-browser
 If you're in China, use the mirror cdn to download phantomjs:
 
 ```
-$ PHANTOMJS_CDNURL=http://phantomjs.qiniudn.com npm install mocha-browser \
+$ PHANTOMJS_CDNURL=http://npm.taobao.org/dist/phantomjs npm install mocha-browser \
   --registry=http://registry.npm.taobao.org
 ```
 
