@@ -48,7 +48,7 @@ module.exports = function(program, callback) {
   for (var i=0; i < module.paths.length; i++) {
     var bin = path.join(module.paths[i], '.bin/phantomjs');
     if (process.platform === 'win32') {
-      bin += '.cmd';
+      bin = '"' + bin + '.cmd"';
     }
     if (exists(bin)) {
       phantomjs = bin;
