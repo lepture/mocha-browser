@@ -1,6 +1,6 @@
 {
   "name": "mocha-browser-for-spm",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A mocha test suite for browser",
   "author": "Hsiaoming Yang <me@lepture.com>",
   "homepage": "https://github.com/afc163/mocha-browser",
