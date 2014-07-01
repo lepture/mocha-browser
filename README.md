@@ -8,7 +8,7 @@
 Install mocha-browser with npm:
 
 ```
-$ npm install mocha-browser
+$ npm install -g mocha-browser
 ```
 
 ## Usage
