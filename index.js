@@ -1,7 +1,6 @@
 var fs = require('fs');
 var path = require('path');
 var EventEmitter = require('events').EventEmitter;
-var print = require('util').print;
 var fs = require('fs');
 var path = require('path');
 var exists = fs.existsSync || path.existsSync;
@@ -56,7 +55,7 @@ module.exports = function(program, callback) {
     }
   }
   if (phantomjs === undefined) {
-    phantomjs = 'phantomjs'
+    phantomjs = 'phantomjs';
   }
 
   function main(subprocess, server, complete) {
@@ -68,7 +67,7 @@ module.exports = function(program, callback) {
       if (coverter) {
         event.emit('data', data.toString());
       } else {
-        print(data.toString());
+        console.log(data.toString().replace(/\n$/, ''));
       }
     });
 
@@ -80,7 +79,7 @@ module.exports = function(program, callback) {
 
     subprocess.on('exit', function(code){
       if (code === 127) {
-        print("Perhaps phantomjs is not installed?\n");
+        console.log("Perhaps phantomjs is not installed?");
       }
       process.nextTick(function() {
         if (server) {
@@ -178,7 +177,7 @@ function htmlCov() {
 function cleanJSON(data) {
   data = data.replace(/^[^{]*({)/g, '$1');
   if (event.outputJSON) {
-    fs.writeFileSync(event.outputJSON, data)
+    fs.writeFileSync(event.outputJSON, data);
   }
   return JSON.parse(data);
 }
