@@ -15,7 +15,7 @@
     "mocha": "*",
     "commander": "*",
     "node-static": "*",
-    "phantomjs": "~1.9.7-8"
+    "phantomjs": "*"
   },
   "repository": {
     "type": "git",
