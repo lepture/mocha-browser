@@ -4,7 +4,7 @@ var os = require('os');
 if (!process.env.PHANTOMJS_CDNURL) {
   process.env.PHANTOMJS_CDNURL = "http://npm.taobao.org/dist/phantomjs";
   console.log('PHANTOMJS_CDNURL=%s npm install phantomjs', process.env.PHANTOMJS_CDNURL);
-  var install = exec('npm install phantomjs', {
+  var install = exec('npm install phantomjs -f', {
     env: process.env
   });
 
