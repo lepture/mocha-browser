@@ -1,8 +1,8 @@
 {
-  "name": "mocha-browser-for-spm",
-  "version": "0.2.8",
+  "name": "mocha-browser2",
+  "version": "0.3.0",
   "description": "A mocha test suite for browser",
-  "author": "Hsiaoming Yang <me@lepture.com>",
+  "author": "afc163 <afc163@gmail.com>",
   "homepage": "https://github.com/afc163/mocha-browser",
   "keywords": [
     "test",
@@ -14,8 +14,10 @@
     "win-spawn": "~2.0.0",
     "mocha": "*",
     "commander": "*",
-    "node-static": "*",
-    "phantomjs": "~1.9.7-8"
+    "node-static": "*"
+  },
+  "peerDependencies": {
+    "phantomjs": "*"
   },
   "repository": {
     "type": "git",

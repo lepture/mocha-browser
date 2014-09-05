@@ -67,7 +67,7 @@ module.exports = function(program, callback) {
       if (coverter) {
         event.emit('data', data.toString());
       } else {
-        console.log(data.toString().replace(/\n$/, ''));
+        process.stdout.write(data.toString());
       }
     });
 
