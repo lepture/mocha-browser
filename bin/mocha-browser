@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
-var program = require('commander'),
-      print = require('util').print,
-         fs = require('fs'),
-       path = require('path'),
-     exists = fs.existsSync || path.existsSync,
-        cwd = process.cwd(),
-    cookies = [],
-    headers = {},
-   settings = {};
+var program = require('commander');
+var fs = require('fs');
+var path = require('path');
+var exists = fs.existsSync || path.existsSync;
+var cwd = process.cwd();
+var cookies = [];
+var headers = {};
+var settings = {};
 
 function keyValue(val, store) {
   val = val.split('=');
@@ -20,17 +19,21 @@ function keyValue(val, store) {
   store[val[0]] = val[1];
   return val;
 }
+
 function cookiesParser(val) {
   val = JSON.parse(val);
   cookies.push(val);
   return val;
 }
+
 function header(val) {
   return keyValue(val, headers);
 }
+
 function setting(val) {
   return keyValue(val, settings);
 }
+
 function viewport(val) {
   val = val.split('x');
   return {
@@ -68,13 +71,8 @@ if (!program.args.length) {
   program.outputHelp();
   process.exit(1);
 }
-if (program.agent) {
-  settings.userAgent = program.agent;
-}
 
-var script = fs.realpathSync(__dirname + '/../lib/mocha-phantomjs.coffee');
-var reporter = program.reporter;
-var page = function() {
+program.page = function() {
   var arg = program.args[0];
 
   if (arg.match(/file:\/\//)) {
@@ -103,88 +101,7 @@ var page = function() {
   return arg;
 }();
 
-var config = JSON.stringify({
-  timeout: program.timeout,
-  cookies: cookies,
-  headers: headers,
-  settings: settings,
-  viewportSize: program.view,
-  useColors: program.color
+var mochaBrowser = require('..');
+mochaBrowser(program, function(code) {
+  process.exit(code);
 });
-
-var self = require('..');
-self.outputJSON = program.output;
-var coverter = self[reporter];
-if (coverter) {
-  reporter = coverter.reporter;
-}
-
-var spawnArgs = [script, page, reporter, config];
-
-var phantomjs;
-for (var i=0; i < module.paths.length; i++) {
-  var bin = path.join(module.paths[i], '.bin/phantomjs');
-  if (process.platform === 'win32') {
-    bin += '.cmd';
-  }
-  if (exists(bin)) {
-    phantomjs = bin;
-    break;
-  }
-}
-if (phantomjs === undefined) {
-  phantomjs = 'phantomjs'
-}
-
-function main(subprocess, server) {
-  if (coverter) {
-    coverter.listen();
-  }
-  subprocess.stdout.on('data', function(data){
-    if (coverter) {
-      self.emit('data', data.toString());
-    } else {
-      print(data.toString());
-    }
-  });
-  subprocess.stdout.on('end', function() {
-    if (self) {
-      self.emit('end');
-    }
-  });
-
-  subprocess.on('exit', function(code){
-    if (code === 127) { 
-      print("Perhaps phantomjs is not installed?\n");
-    }
-    process.nextTick(function() {
-      if (server) {
-        server.close();
-      }
-      process.exit(code);
-    });
-  });
-}
-
-function createServer() {
-  var spawn = require('win-spawn');
-
-  if (!program.server) {
-    return main(spawn(phantomjs, spawnArgs));
-  }
-
-  var Server = require('node-static').Server;
-  var http = require('http');
-
-  var file = new Server(fs.realpathSync('.'));
-
-  var server = http.createServer(function(request, response) {
-    request.addListener('end', function() {
-      file.serve(request, response);
-    }).resume();
-  });
-  server.listen(program.port, function() {
-    return main(spawn(phantomjs, spawnArgs), server);
-  });
-}
-createServer();

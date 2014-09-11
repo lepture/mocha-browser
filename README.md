@@ -11,6 +11,13 @@ Install mocha-browser with npm:
 $ npm install -g mocha-browser
 ```
 
+If you're in China, use the mirror cdn to download phantomjs:
+
+```
+$ PHANTOMJS_CDNURL=http://npm.taobao.org/dist/phantomjs npm install mocha-browser \
+  --registry=http://registry.npm.taobao.org
+```
+
 ## Usage
 
 Test for local path:
@@ -55,6 +62,10 @@ The code in `lib/` are all borrowed from mocha-phantomjs.
 mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
+
+**Dec 2, 2013** `0.2.0`
+
+Update mocha-phantomjs
 
 **Dec 2, 2013** `0.2.0`
 

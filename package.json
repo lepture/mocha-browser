@@ -1,9 +1,9 @@
 {
-  "name": "mocha-browser",
-  "version": "0.2.0",
+  "name": "mocha-browser2",
+  "version": "0.3.1",
   "description": "A mocha test suite for browser",
-  "author": "Hsiaoming Yang <me@lepture.com>",
-  "homepage": "https://github.com/lepture/mocha-browser",
+  "author": "afc163 <afc163@gmail.com>",
+  "homepage": "https://github.com/afc163/mocha-browser",
   "keywords": [
     "test",
     "mocha",
@@ -16,14 +16,20 @@
     "commander": "*",
     "node-static": "*"
   },
+  "peerDependencies": {
+    "phantomjs": "*"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lepture/mocha-browser.git"
+    "url": "https://github.com/afc163/mocha-browser.git"
   },
   "bugs": {
-    "url": "https://github.com/lepture/mocha-browser/issues"
+    "url": "https://github.com/afc163/mocha-browser/issues"
   },
   "bin": {
     "mocha-browser": "bin/mocha-browser"
+  },
+  "scripts": {
+    "preinstall": "node preinstall.js"
   }
 }
