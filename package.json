@@ -1,6 +1,6 @@
 {
   "name": "mocha-browser2",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A mocha test suite for browser",
   "author": "afc163 <afc163@gmail.com>",
   "homepage": "https://github.com/afc163/mocha-browser",
