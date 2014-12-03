@@ -56,6 +56,10 @@ mocha-phantomjs did the test, and we can trust it.
 
 ## Changelog
 
+**Dec 3, 2014** `0.3.0`
+
+Update mocha-phantomjs
+
 **Dec 2, 2013** `0.2.0`
 
 Update mocha-phantomjs
