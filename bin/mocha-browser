@@ -72,7 +72,7 @@ if (program.agent) {
   settings.userAgent = program.agent;
 }
 
-var script = fs.realpathSync(__dirname + '/../lib/mocha-phantomjs.coffee');
+var script = fs.realpathSync(__dirname + '/../node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee');
 var reporter = program.reporter;
 var page = function() {
   var arg = program.args[0];
@@ -154,7 +154,7 @@ function main(subprocess, server) {
   });
 
   subprocess.on('exit', function(code){
-    if (code === 127) { 
+    if (code === 127) {
       print("Perhaps phantomjs is not installed?\n");
     }
     process.nextTick(function() {
