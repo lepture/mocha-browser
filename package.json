@@ -11,10 +11,11 @@
     "unittest"
   ],
   "dependencies": {
-    "win-spawn": "~2.0.0",
-    "mocha": "*",
     "commander": "*",
-    "node-static": "*"
+    "mocha": "*",
+    "node-static": "*",
+    "phantomjs": "^1.9.12",
+    "win-spawn": "~2.0.0"
   },
   "repository": {
     "type": "git",
