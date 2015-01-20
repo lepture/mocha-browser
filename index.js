@@ -176,6 +176,7 @@ function htmlCov() {
 
 function cleanJSON(data) {
   data = data.replace(/^(}?)Error loading resource .+?$/gm, '$1');
+  data = data.replace(/^(}?)Unsafe JavaScript attempt to access frame .+?$/gm, '$1');
   data = data.replace(/^[^{]*({)/g, '$1');
   if (event.outputJSON) {
     fs.writeFileSync(event.outputJSON, data);
